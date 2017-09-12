@@ -16,6 +16,17 @@ var app = express();
 app.set('view engine', 'ejs');
 app.disable( 'x-powered-by' );
 
+// Redirect to https
+app.use(function(req, res, next) {
+  if (req.headers
+      && req.headers.host
+      && req.headers["x-forwarded-proto"]
+      && "https" !== req.headers["x-forwarded-proto"]) {
+      return res.redirect("https://" + req.headers.host + req.url);
+  }
+  next();
+})
+
 // Auth enabled
 if (CONFIG.AUTH_KEY && CONFIG.AUTH_SECRET) {
   console.log("Basic auth enabled");

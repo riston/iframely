@@ -7,12 +7,47 @@ console.log("Base URL for embeds that require hosted renders:", CONFIG.baseAppUr
 var path = require('path');
 var express = require('express');
 var jsonxml = require('jsontoxml');
+var bcrypt = require('bcryptjs');
 
 var NotFound = sysUtils.NotFound;
 
 var app = express();
 
 app.set('view engine', 'ejs');
+app.disable( 'x-powered-by' );
+
+// Auth enabled
+if (CONFIG.AUTH_KEY && CONFIG.AUTH_SECRET) {
+  console.log("Basic auth enabled");
+
+  app.use(function(req, res, next) {
+    var auth = req.get('authorization');
+
+    if (!auth) {
+      res.set('WWW-Authenticate', 'Basic realm="Authorization Required"');
+      return res.status(401)
+        .send('Authorization Required');
+    }
+    var content = (auth || '').split(' ').pop();
+    var credentials = new Buffer(content, 'base64')
+      .toString('ascii')
+      .split(':');
+
+    var username = credentials[0];
+    if (CONFIG.AUTH_KEY !== username) {
+      return res.status(401)
+        .send('Access Denied (incorrect credentials)');
+    } else {
+      bcrypt.compare(credentials[1], CONFIG.AUTH_SECRET, function(err, isEqual) {
+          if (err || !isEqual) {
+            return res.status(401)
+              .send('Access Denied (incorrect credentials)');
+          }
+          return next();
+      });
+    }
+  });
+}
 
 if (CONFIG.allowedOrigins) {
   app.use(function(req, res, next) {
@@ -30,7 +65,6 @@ if (CONFIG.allowedOrigins) {
     next();
   });
 }
-app.disable( 'x-powered-by' );
 app.use(function(req, res, next) {
   res.setHeader('X-Powered-By', 'Iframely');
   next();
@@ -122,16 +156,16 @@ function errorHandler(err, req, res, next) {
     }
     else if (code === 404) {
       respondWithError(req, res, 404, 'Not found');
-    }    
+    }
     else if (code === 410) {
       respondWithError(req, res, 410, 'Gone');
     }
     else if (code === 415) {
       respondWithError(req, res, 415, 'Unsupported Media Type');
-    } 
+    }
     else if (code === 417) {
       respondWithError(req, res, 417, 'Unsupported Media Type');
-    }    
+    }
     else {
       respondWithError(req, res, code, 'Server error');
     }

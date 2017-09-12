@@ -7,6 +7,9 @@
         DEBUG: false,
         RICH_LOG_ENABLED: false,
 
+        AUTH_KEY: process.env.AUTH_KEY,
+        AUTH_SECRET: process.env.AUTH_SECRET,
+
         // For embeds that require render, baseAppUrl will be used as the host.
         baseAppUrl: "http://yourdomain.com",
         relativeStaticUrl: "/r",
@@ -139,8 +142,8 @@
 
         // Customize API calls to 3rd parties. At the very least - configure required keys.
         providerOptions: {
-            locale: "en_US",    // ISO 639-1 two-letter language code, e.g. en_CA or fr_CH. 
-                                // Will be added as highest priotity in accept-language header with each request. 
+            locale: "en_US",    // ISO 639-1 two-letter language code, e.g. en_CA or fr_CH.
+                                // Will be added as highest priotity in accept-language header with each request.
                                 // Plus is used in FB, YouTube and perhaps other plugins
             "twitter": {
                 "max-width": 550,

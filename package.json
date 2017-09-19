@@ -60,6 +60,6 @@
         "test-e2e": "NODE_ENV=test PORT=8080 mocha test"
     },
     "engines": {
-        "node": "6.x"
+        "node": "~6.11"
     }
 }
